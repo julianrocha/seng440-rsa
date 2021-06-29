@@ -2,12 +2,16 @@
 
 /*
 Design steps:
-- Look up table ?
+- Look up table ? SKIP FOR NOW
 - Modular exponentiation (multiply and square algorithm)
 - Montgomery Modular Multiplication
-- Very long integer arithmetic routines ?
+- unint96 union?
+
+- More test cases (bigger numbers)
+
 - Port to VM
 - Profile
+- Very long integer arithmetic routines ?
 
 Optimization Considerations:
 - arithmetic on very long integers (need to write routines for this)
