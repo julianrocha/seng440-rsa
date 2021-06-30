@@ -1,12 +1,22 @@
-FILE_NAME= mock1
+CC     := gcc
+# CFLAGS := -I. -Wundef -Wall -Wextra -O
 
-all: build run
+RSA_FILE_NAME= mock1
+BIGNUM_FILE_NAME=bignum
 
-build:
-	@gcc $(FILE_NAME).c -o $(FILE_NAME).o
+all: run_rsa run_bignum
 
-run: build
-	@./$(FILE_NAME).o
+build_rsa:
+	@$(CC) $(CFLAGS) $(RSA_FILE_NAME).c -o $(RSA_FILE_NAME).o
+
+run_rsa: build_rsa
+	@./$(RSA_FILE_NAME).o
+
+build_bignum:
+	@$(CC) $(CFLAGS) $(BIGNUM_FILE_NAME).c $(BIGNUM_FILE_NAME)_tester.c -o $(BIGNUM_FILE_NAME).o	
+
+run_bignum: build_bignum
+	@./$(BIGNUM_FILE_NAME).o
 
 clean:
 	@rm *.o
