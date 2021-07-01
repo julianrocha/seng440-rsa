@@ -7,7 +7,7 @@ Design steps:
 - Montgomery Modular Multiplication
 - unint96 union?
 - More test cases (bigger numbers)
-    - p and q should be half size of n (so ~96/2=48 bits each)
+- p and q should be half size of n (so ~96/2=48 bits each)
 - Port to VM
 - Profile
 - Very long integer arithmetic routines ?
