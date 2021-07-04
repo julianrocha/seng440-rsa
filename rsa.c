@@ -44,14 +44,12 @@ void modular_exponentiation(bignum base, bignum exp, bignum modulus, bignum *res
 
     while (!bignum_is_zero(&exp))
     {
-        /*
-        printf("\nbase:   ");
-        print_bignum(&base);
-        printf("exp:    ");
-        print_bignum(&exp);
-        printf("result: ");
-        print_bignum(result);
-        */
+        // printf("\nbase:   ");
+        // print_bignum(&base);
+        // printf("exp:    ");
+        // print_bignum(&exp);
+        // printf("result: ");
+        // print_bignum(result);
 
         if (exp.arr[0] & 1)
         {
@@ -71,9 +69,7 @@ ORIGINAL ALGORITHM WITH PRIMITIVE TYPES:
 {
 	if (modulus == 1)
 		return 0; // no computation to perform if modulus is 1
-
-	bignum *result;
-	result = 1;
+	unsigned long int result = 1;
 	while (exp > 0)
 	{
 		if (exp & 1)							// exp % 2 != 0
@@ -114,7 +110,6 @@ int main()
     printf("Type sizes on this machine (bits): char:%lu, short:%lu, int:%lu, long:%lu, long long:%lu, size_t:%lu\n", sizeof(unsigned char) * 8, sizeof(unsigned short) * 8, sizeof(unsigned int) * 8, sizeof(unsigned long) * 8, sizeof(unsigned long long) * 8, sizeof(size_t) * 8);
 
     // For this project, keys can be generated offline
-    unsigned int p_int, q_int, e_int, d_int, t_int;
     /*
     WORKING:
     p_int = 61;
@@ -122,29 +117,26 @@ int main()
     e_int = 17;
     d_int = 2753;
     t_int = 123;
-
-    
-    BELOW NOT WORKING FOR SOME REASON
-    p_int = 2053;
-    q_int = 8209;
-    e_int = 17;
-    d_int = 2753;
-    t_int = 123;
     */
+    
+/*
     // WORKING:
     p_int = 11;
     q_int = 13;
     e_int = 7;
     d_int = 103;
     t_int = 9;
+    */
+    char n_str[] = "00000000000a3de01493a3db";
+    char e_str[] = "000000000000000000010001";
+    char d_str[] = "00000000000786734bf8c671";
+    char t_str[] = "000000000000000073000001";
 
-    bignum p, q, n, e, d, t, c, t_decrypted;
-    bignum_from_int(&p, p_int);
-    bignum_from_int(&q, q_int);
-    bignum_mul(&p, &q, &n);
-    bignum_from_int(&e, e_int);
-    bignum_from_int(&d, d_int);
-    bignum_from_int(&t, t_int);
+    bignum n, e, d, t, c, t_decrypted;
+    bignum_from_string(&n, n_str);
+    bignum_from_string(&e, e_str);
+    bignum_from_string(&d, d_str);
+    bignum_from_string(&t, t_str);
 
     printf("RSA Configuration: \n");
     printf("n: ");
