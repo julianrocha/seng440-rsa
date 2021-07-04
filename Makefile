@@ -1,13 +1,13 @@
 CC     := gcc
-# CFLAGS := -I. -Wundef -Wall -Wextra -O
+CFLAGS := -I. -Wundef -Wall -Wextra -O
 
-RSA_FILE_NAME= mock1
+RSA_FILE_NAME=rsa
 BIGNUM_FILE_NAME=bignum
 
 all: run_rsa run_bignum
 
 build_rsa:
-	@$(CC) $(CFLAGS) $(RSA_FILE_NAME).c -o $(RSA_FILE_NAME).o
+	@$(CC) $(CFLAGS) $(BIGNUM_FILE_NAME).c $(RSA_FILE_NAME).c -o $(RSA_FILE_NAME).o
 
 run_rsa: build_rsa
 	@./$(RSA_FILE_NAME).o
