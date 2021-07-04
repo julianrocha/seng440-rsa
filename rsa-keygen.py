@@ -1,6 +1,6 @@
 import rsa
 
-KEY_LEN = 52
+KEY_LEN = 96
 HEXLEN = int(96 / 4)  # 96 bit hex numbers
 
 
