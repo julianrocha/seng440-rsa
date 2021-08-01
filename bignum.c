@@ -117,6 +117,8 @@ void bignum_mul(bignum *a, bignum *b, bignum *c) /* c = a * b */
 	bignum row;
 	bignum tmp;
 	int i, j;
+	// i : index for a
+	// j : index for b
 
 	bignum_init(c);
 

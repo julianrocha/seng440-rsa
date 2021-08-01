@@ -110,27 +110,10 @@ int main()
     printf("Type sizes on this machine (bits): char:%lu, short:%lu, int:%lu, long:%lu, long long:%lu, size_t:%lu\n", sizeof(unsigned char) * 8, sizeof(unsigned short) * 8, sizeof(unsigned int) * 8, sizeof(unsigned long) * 8, sizeof(unsigned long long) * 8, sizeof(size_t) * 8);
 
     // For this project, keys can be generated offline
-    /*
-    WORKING:
-    p_int = 61;
-    q_int = 53;
-    e_int = 17;
-    d_int = 2753;
-    t_int = 123;
-    */
-    
-/*
-    // WORKING:
-    p_int = 11;
-    q_int = 13;
-    e_int = 7;
-    d_int = 103;
-    t_int = 9;
-    */
-    char n_str[] = "00000000000a3de01493a3db";
-    char e_str[] = "000000000000000000010001";
-    char d_str[] = "00000000000786734bf8c671";
-    char t_str[] = "000000000000000073000001";
+    char n_str[] = "0000000000000000000000008314cf44717ed7a07a3a3d05";
+    char e_str[] = "000000000000000000000000000000000000000000010001";
+    char d_str[] = "000000000000000000000000096b245d719ded5fbda5b9dd";
+    char t_str[] = "000000000000000000000000000000000000000073000001";
 
     bignum n, e, d, t, c, t_decrypted;
     bignum_from_string(&n, n_str);
