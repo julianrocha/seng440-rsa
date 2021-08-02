@@ -107,7 +107,7 @@ void decrypt(bignum c, bignum d, bignum n, bignum *t)
 */
 int main()
 {
-    printf("Type sizes on this machine (bits): char:%lu, short:%lu, int:%lu, long:%lu, long long:%lu, size_t:%lu\n", sizeof(unsigned char) * 8, sizeof(unsigned short) * 8, sizeof(unsigned int) * 8, sizeof(unsigned long) * 8, sizeof(unsigned long long) * 8, sizeof(size_t) * 8);
+    printf("Type sizes on this machine (bits): char:%u, short:%u, int:%u, long:%u, long long:%u, size_t:%u\n", sizeof(unsigned char) * 8, sizeof(unsigned short) * 8, sizeof(unsigned int) * 8, sizeof(unsigned long) * 8, sizeof(unsigned long long) * 8, sizeof(size_t) * 8);
 
     // For this project, keys can be generated offline
     char n_str[] = "0000000000000000000000008314cf44717ed7a07a3a3d05";
