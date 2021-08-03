@@ -1,0 +1,22 @@
+There should be a concept of bignum and double bignum.
+Multiplication inherently doubles width, we must be able to deal with both. (in the same code)
+We need a custom operation:
+	- mult_mod
+	- bignum * bignum = hugenum
+	- hugenum % bignum = bignum
+
+Possible solution
+- generalize functions to handle arbitraty length int arrays (realistically will only handle single and double)
+- do away with structs
+- always pass bignum array lens in the parameters
+- add some helper init functions
+- write the custom function
+
+Question
+- does any function need to handle 2 sizes at once?
+
+- mult
+	- huge_num+huge_num -> hugenum
+- div_mod
+	- div : huge_num / big_num -> huge_num
+	- mul : huge_num * big_num -> huge_num // we may lose precision here 

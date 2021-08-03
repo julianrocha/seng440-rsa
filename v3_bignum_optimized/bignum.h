@@ -18,7 +18,7 @@ Binary Value: |	0000 0000 0000 0000 0000 0000 0000 0000	|	0000 0000 0000 0000 00
 #include <stdint.h> // to specify specific dtype sizes for unsigned ints
 
 #define WORD_BYTES 4 // ARM is a 32-bit machine
-#define BN_BYTES 12	 // We want to work with 96 bit numbers
+#define BN_BYTES 12 // 96 bit numbers (12 bytes)
 #define BN_ARRAY_LEN (BN_BYTES / WORD_BYTES)
 
 #define BN_DTYPE uint32_t	  // dtype of each array element, ARM is a 32-bit machine
