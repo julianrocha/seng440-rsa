@@ -1,8 +1,7 @@
 import rsa
 
 KEY_LEN = 96
-HEXLEN = 2 * int(96 / 4)  # 96 bit hex numbers
-# TODO: multiply by 2 while we have 192 bit keys in bignum
+HEXLEN = int(96 / 4)  # 96 bit hex numbers
 
 
 def padhex(val):

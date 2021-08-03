@@ -1,5 +1,5 @@
 CC     := gcc
-CFLAGS := -I. -Wundef -Wall -Wextra -O -pg
+CFLAGS := -I. -Wundef -Wall -Wextra -pg -g
 
 RSA_FILE_NAME=rsa
 BIGNUM_FILE_NAME=bignum
