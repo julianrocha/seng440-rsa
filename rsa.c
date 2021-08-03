@@ -110,10 +110,12 @@ int main()
     printf("Type sizes on this machine (bits): char:%u, short:%u, int:%u, long:%u, long long:%u, size_t:%u\n", sizeof(unsigned char) * 8, sizeof(unsigned short) * 8, sizeof(unsigned int) * 8, sizeof(unsigned long) * 8, sizeof(unsigned long long) * 8, sizeof(size_t) * 8);
 
     // For this project, keys can be generated offline
-    char n_str[] = "0000000000000000000000008314cf44717ed7a07a3a3d05";
-    char e_str[] = "000000000000000000000000000000000000000000010001";
-    char d_str[] = "000000000000000000000000096b245d719ded5fbda5b9dd";
-    char t_str[] = "000000000000000000000000000000000000000073000001";
+    printf("\nTESTING 96 bit keys\n");
+    // 96 bit keys
+    char n_str[] = "b00d2123f00d92d08643cd4f";
+    char e_str[] = "000000000000000000010001";
+    char d_str[] = "1f175280fc4501ce37cb57d1";
+    char t_str[] = "000000050000000073000001";
 
     bignum n, e, d, t, c, t_decrypted;
     bignum_from_string(&n, n_str);
@@ -139,6 +141,36 @@ int main()
     decrypt(c, d, n, &t_decrypted);
     printf("t: ");
     print_bignum(&t_decrypted);
+    
+    printf("\nTESTING 48 bit keys\n");
+    // 48 bit keys
+    char n_str_48[] = "000000000000bc046e91ae5f";
+    char e_str_48[] = "000000000000000000010001";
+    char d_str_48[] = "0000000000009420e4147c29";
+    char t_str_48[] = "000000000000000073000001";
 
+    bignum_from_string(&n, n_str_48);
+    bignum_from_string(&e, e_str_48);
+    bignum_from_string(&d, d_str_48);
+    bignum_from_string(&t, t_str_48);
+
+    printf("RSA Configuration: \n");
+    printf("n: ");
+    print_bignum(&n);
+    printf("e: ");
+    print_bignum(&e);
+    printf("d: ");
+    print_bignum(&d);
+    printf("t: ");
+    print_bignum(&t);
+
+    printf("ENCRYPT...\n");
+    encrypt(t, e, n, &c);
+    printf("c: ");
+    print_bignum(&c);
+    printf("DECRYPT...\n");
+    decrypt(c, d, n, &t_decrypted);
+    printf("t: ");
+    print_bignum(&t_decrypted); 
     return 0;
 }
