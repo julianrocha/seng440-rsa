@@ -53,11 +53,14 @@ void modular_exponentiation(bignum base, bignum exp, bignum modulus, bignum *res
 
         if (exp.arr[0] & 1)
         {
+            // result = (result * base) % modulus; // multiply step
             bignum_mul(result, &base, &tmp_result);
             bignum_mod(&tmp_result, &modulus, result);
         }
         bignum_rshift(&exp, &tmp_exp, 1);
         bignum_assign(&exp, &tmp_exp);
+
+        // base = (base * base) % modulus;			// square step
         bignum_mul(&base, &base, &tmp_base);
         bignum_mod(&tmp_base, &modulus, &base);
     }
