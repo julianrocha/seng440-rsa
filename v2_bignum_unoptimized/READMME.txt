@@ -1,0 +1,1 @@
+This version uses 192 bit keys to handle 96 bit keys doubling width when getting multiplied. It uses bignums but no optimizations have been applied.

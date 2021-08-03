@@ -8,6 +8,7 @@ We need a custom operation:
 Possible solution
 - generalize functions to handle arbitraty length int arrays (realistically will only handle single and double)
 - do away with structs
+- always pass bignum array lens in the parameters
 - add some helper init functions
 - write the custom function
 
@@ -18,4 +19,4 @@ Question
 	- huge_num+huge_num -> hugenum
 - div_mod
 	- div : huge_num / big_num -> huge_num
-	- mul : huge_num * big_num -> 
+	- mul : huge_num * big_num -> huge_num // we may lose precision here 

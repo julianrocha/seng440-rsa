@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include "bignum.h"
 
 /*
@@ -113,18 +114,23 @@ int main()
     printf("Type sizes on this machine (bits): char:%u, short:%u, int:%u, long:%u, long long:%u, size_t:%u\n", sizeof(unsigned char) * 8, sizeof(unsigned short) * 8, sizeof(unsigned int) * 8, sizeof(unsigned long) * 8, sizeof(unsigned long long) * 8, sizeof(size_t) * 8);
 
     // For this project, keys can be generated offline
-    printf("\nTESTING 96 bit keys\n");
-    // 96 bit keys
-    char n_str[] = "b00d2123f00d92d08643cd4f";
-    char e_str[] = "000000000000000000010001";
-    char d_str[] = "1f175280fc4501ce37cb57d1";
-    char t_str[] = "000000050000000073000001";
-
     bignum n, e, d, t, c, t_decrypted;
-    bignum_from_string(&n, n_str);
-    bignum_from_string(&e, e_str);
-    bignum_from_string(&d, d_str);
-    bignum_from_string(&t, t_str);
+    clock_t before;
+    clock_t after;
+    clock_t encrypt_cycles;
+    clock_t decrypt_cycles;
+
+     // 24 bit keys
+    printf("\nTESTING 24 bit keys\n");
+    char n_str_24[] = "000000000000000000a73911";
+    char e_str_24[] = "000000000000000000010001";
+    char d_str_24[] = "0000000000000000004a051d";
+    char t_str_24[] = "000000000000000000080501";
+
+    bignum_from_string(&n, n_str_24);
+    bignum_from_string(&e, e_str_24);
+    bignum_from_string(&d, d_str_24);
+    bignum_from_string(&t, t_str_24);
 
     printf("RSA Configuration: \n");
     printf("n: ");
@@ -137,20 +143,27 @@ int main()
     print_bignum(&t);
 
     printf("ENCRYPT...\n");
+	before = clock();
     encrypt(t, e, n, &c);
+	after = clock();
+    encrypt_cycles = after - before;
     printf("c: ");
     print_bignum(&c);
     printf("DECRYPT...\n");
+    before = clock();
     decrypt(c, d, n, &t_decrypted);
+    after = clock();
+    decrypt_cycles = after - before;
     printf("t: ");
-    print_bignum(&t_decrypted);
-    
-    printf("\nTESTING 48 bit keys\n");
+    print_bignum(&t_decrypted); 
+    printf("Encrypt Cycles: %ld\nDecrypt Cycles: %ld\n", encrypt_cycles, decrypt_cycles);
+
     // 48 bit keys
+    printf("\nTESTING 48 bit keys\n");
     char n_str_48[] = "000000000000bc046e91ae5f";
     char e_str_48[] = "000000000000000000010001";
     char d_str_48[] = "0000000000009420e4147c29";
-    char t_str_48[] = "000000000000000073000001";
+    char t_str_48[] = "000000000000500073000001";
 
     bignum_from_string(&n, n_str_48);
     bignum_from_string(&e, e_str_48);
@@ -168,12 +181,58 @@ int main()
     print_bignum(&t);
 
     printf("ENCRYPT...\n");
+	before = clock();
     encrypt(t, e, n, &c);
+	after = clock();
+    encrypt_cycles = after - before;
     printf("c: ");
     print_bignum(&c);
     printf("DECRYPT...\n");
+    before = clock();
     decrypt(c, d, n, &t_decrypted);
+    after = clock();
+    decrypt_cycles = after - before;
     printf("t: ");
     print_bignum(&t_decrypted); 
+    printf("Encrypt Cycles: %ld\nDecrypt Cycles: %ld\n", encrypt_cycles, decrypt_cycles);
+
+    // 96 bit keys
+    printf("\nTESTING 96 bit keys\n");
+    char n_str_96[] = "000d2123f00d92d08643cd4f";
+    char e_str_96[] = "000000000000000000010001";
+    char d_str_96[] = "1f175280fc4501ce37cb57d1";
+    char t_str_96[] = "400000050000000073000001";
+
+    bignum_from_string(&n, n_str_96);
+    bignum_from_string(&e, e_str_96);
+    bignum_from_string(&d, d_str_96);
+    bignum_from_string(&t, t_str_96);
+
+    printf("RSA Configuration: \n");
+    printf("n: ");
+    print_bignum(&n);
+    printf("e: ");
+    print_bignum(&e);
+    printf("d: ");
+    print_bignum(&d);
+    printf("t: ");
+    print_bignum(&t);
+
+    printf("ENCRYPT...\n");
+	before = clock();
+    encrypt(t, e, n, &c);
+	after = clock();
+    encrypt_cycles = after - before;
+    printf("c: ");
+    print_bignum(&c);
+    printf("DECRYPT...\n");
+    before = clock();
+    decrypt(c, d, n, &t_decrypted);
+    after = clock();
+    decrypt_cycles = after - before;
+    printf("t: ");
+    print_bignum(&t_decrypted); 
+    printf("Encrypt Cycles: %ld\nDecrypt Cycles: %ld\n", encrypt_cycles, decrypt_cycles);
+    
     return 0;
 }
