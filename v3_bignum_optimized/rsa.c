@@ -278,7 +278,7 @@ int main()
 
     // 96 bit keys
     printf("\nTESTING 96 bit keys\n");
-    char n_str_96[] = "000d2123f00d92d08643cd4f";
+    char n_str_96[] = "b00d2123f00d92d08643cd4f";
     char e_str_96[] = "000000000000000000010001";
     char d_str_96[] = "1f175280fc4501ce37cb57d1";
     char t_str_96[] = "400000050000000073000001";
@@ -290,7 +290,7 @@ int main()
     nBits = bignum_numbits(&n);
     // bignum_from_int(&r_exp, 2 * nBits);
     // modular_exponentiation(two, r_exp, n, &r2m);
-    bignum_from_string(&r2m, "2db52cacc055e1ec000dc3c9"); // Must be pre-computed with double width bignums
+    bignum_from_string(&r2m, "68011252a3f2d488c6f6b68e"); // Must be pre-computed with double width bignums
 
     printf("RSA Configuration: \n");
     printf("n: ");

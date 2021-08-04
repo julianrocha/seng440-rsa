@@ -19,7 +19,7 @@ Binary Value: |	0000 0000 0000 0000 0000 0000 0000 0000	|	0000 0000 0000 0000 00
 
 #define WORD_BYTES 4 // ARM is a 32-bit machine
 #define BN_BYTES 12 // 96 bit numbers (12 bytes)
-#define BN_ARRAY_LEN (BN_BYTES / WORD_BYTES)
+#define BN_ARRAY_LEN (BN_BYTES / WORD_BYTES + 1) // +1 to handle addition overfow
 
 #define BN_DTYPE uint32_t	  // dtype of each array element, ARM is a 32-bit machine
 #define BN_DTYPE_TMP uint64_t // twice the BN_DTYPE size to handle operations like multiplication
