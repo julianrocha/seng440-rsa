@@ -61,6 +61,46 @@ void montMult(bignum  *x, bignum *y, bignum *m, int mBits, bignum *out){
 	bignum_assign(out,&t);
 }
 
+void modular_exponentiation_with_mont(bignum base, bignum exp, bignum modulus, int modulusBits, bignum r2m, bignum *result)
+{
+    bignum tmp_result;
+    bignum tmp_base;
+    bignum tmp_exp;
+    bignum one;
+
+    bignum_from_int(result, 1);
+    montMult(result,&r2m,&modulus,modulusBits,&tmp_result);
+    bignum_assign(result, &tmp_result);
+
+    montMult(&base, &r2m,&modulus,modulusBits, &tmp_base);
+    bignum_assign(&base, &tmp_base);
+
+    while (!bignum_is_zero(&exp))
+    {
+        if (exp.arr[0] & 1)
+        {
+            // result = (result * base) % modulus; // multiply step
+            // bignum_mul(result, &base, &tmp_result);
+            // bignum_mod(&tmp_result, &modulus, result);
+            montMult(result,&base,&modulus,modulusBits,&tmp_result);
+            bignum_assign(result, &tmp_result); 
+        }
+        bignum_rshift(&exp, &tmp_exp, 1);
+        bignum_assign(&exp, &tmp_exp);
+
+        // base = (base * base) % modulus;			// square step
+        // bignum_mul(&base, &base, &tmp_base);
+        // bignum_mod(&tmp_base, &modulus, &base);
+        montMult(&base, &base,&modulus,modulusBits, &tmp_base);
+        bignum_assign(&base, &tmp_base);
+    }
+    // bignum_mod(result, &modulus, &tmp_result);
+    // bignum_assign(result, &tmp_result);
+    bignum_from_int(&one, 1);
+	montMult(result, &one, &modulus, modulusBits, &tmp_result);
+    bignum_assign(result, &tmp_result); 
+}
+
 /*
 Helper method to compute: result = base**exp % modulus
 "Square and multiply algorithm"
@@ -111,17 +151,17 @@ ORIGINAL ALGORITHM WITH PRIMITIVE TYPES:
 /*
 c = t**e mod n
 */
-void encrypt(bignum t, bignum e, bignum n, bignum *c)
+void encrypt(bignum t, bignum e, bignum n,int nBits, bignum r2m, bignum *c)
 {
-    modular_exponentiation(t, e, n, c);
+    modular_exponentiation_with_mont(t, e, n, nBits, r2m, c);
 }
 
 /*
 t = c**d mod n
 */
-void decrypt(bignum c, bignum d, bignum n, bignum *t)
+void decrypt(bignum c, bignum d, bignum n,int nBits, bignum r2m, bignum *t)
 {
-    modular_exponentiation(c, d, n, t);
+    modular_exponentiation_with_mont(c, d, n, nBits, r2m, t);
 }
 
 /*
@@ -177,14 +217,14 @@ int main()
 
     printf("ENCRYPT...\n");
 	before = clock();
-    encrypt(t, e, n, &c);
+    encrypt(t, e, n, nBits, r2m, &c);
 	after = clock();
     encrypt_cycles = after - before;
     printf("c: ");
     print_bignum(&c);
     printf("DECRYPT...\n");
     before = clock();
-    decrypt(c, d, n, &t_decrypted);
+    decrypt(c, d, n, nBits, r2m, &t_decrypted);
     after = clock();
     decrypt_cycles = after - before;
     printf("t: ");
@@ -222,14 +262,14 @@ int main()
 
     printf("ENCRYPT...\n");
 	before = clock();
-    encrypt(t, e, n, &c);
+    encrypt(t, e, n, nBits, r2m, &c);
 	after = clock();
     encrypt_cycles = after - before;
     printf("c: ");
     print_bignum(&c);
     printf("DECRYPT...\n");
     before = clock();
-    decrypt(c, d, n, &t_decrypted);
+    decrypt(c, d, n, nBits, r2m, &t_decrypted);
     after = clock();
     decrypt_cycles = after - before;
     printf("t: ");
@@ -267,14 +307,14 @@ int main()
 
     printf("ENCRYPT...\n");
 	before = clock();
-    encrypt(t, e, n, &c);
+    encrypt(t, e, n, nBits, r2m, &c);
 	after = clock();
     encrypt_cycles = after - before;
     printf("c: ");
     print_bignum(&c);
     printf("DECRYPT...\n");
     before = clock();
-    decrypt(c, d, n, &t_decrypted);
+    decrypt(c, d, n, nBits, r2m, &t_decrypted);
     after = clock();
     decrypt_cycles = after - before;
     printf("t: ");
