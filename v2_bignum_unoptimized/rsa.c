@@ -114,11 +114,13 @@ int main()
     printf("Type sizes on this machine (bits): char:%u, short:%u, int:%u, long:%u, long long:%u, size_t:%u\n", sizeof(unsigned char) * 8, sizeof(unsigned short) * 8, sizeof(unsigned int) * 8, sizeof(unsigned long) * 8, sizeof(unsigned long long) * 8, sizeof(size_t) * 8);
 
     // For this project, keys can be generated offline
-    bignum n, e, d, t, c, t_decrypted;
+    bignum n, e, d, t, c, t_decrypted, two, r_exp, r2m;
+    int nBits;
     clock_t before;
     clock_t after;
     clock_t encrypt_cycles;
     clock_t decrypt_cycles;
+    bignum_from_int(&two, 2);
 
      // 24 bit keys
     printf("\nTESTING 24 bit keys\n");
@@ -207,6 +209,9 @@ int main()
     bignum_from_string(&e, e_str_96);
     bignum_from_string(&d, d_str_96);
     bignum_from_string(&t, t_str_96);
+    nBits = 84;
+    bignum_from_int(&r_exp, 2 * nBits);
+    modular_exponentiation(two, r_exp, n, &r2m);
 
     printf("RSA Configuration: \n");
     printf("n: ");
@@ -217,6 +222,10 @@ int main()
     print_bignum(&d);
     printf("t: ");
     print_bignum(&t);
+    printf("r2m");
+    print_bignum(&r2m);
+    printf("Number of bits in n: %d\n", nBits);
+
 
     printf("ENCRYPT...\n");
 	before = clock();
