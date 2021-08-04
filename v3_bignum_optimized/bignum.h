@@ -10,7 +10,7 @@ big_num is 96 bits = 12 bytes = 3 ints
 big_num range: [0, 2^96-1] = [0, 7.9e28]
 big_num max value:  79,228,162,514,264,337,593,543,950,335 (29 digits)
 
-Least signinficant bit in the first index, big endian:
+Least significant bit in the first index, big endian:
 Index 		: | 					2					| 						1					|						0					|
 Binary Value: |	0000 0000 0000 0000 0000 0000 0000 0000	|	0000 0000 0000 0000 0000 0000 0000 0000 | 	0000 0000 0000 0000 0000 0000 0000 0000 |
 */
@@ -66,5 +66,5 @@ enum
 };
 int bignum_cmp(bignum *a, bignum *b); /* Compare: returns LARGER, EQUAL or SMALLER */
 int bignum_is_zero(bignum *n);		  /* For comparison with zero */
-int bignum_getbit(bignum *a, int n);
-int bignum_numbits(bignum *bn);
+int bignum_get_bit(bignum *a, int n);
+int bignum_num_bits(bignum *a);
