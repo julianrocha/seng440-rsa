@@ -30,6 +30,37 @@ Optimization Considerations:
 - chinese remainder theorem for decryption (using p and q instead of n)
 */
 
+void montMult(bignum  *x, bignum *y, bignum *m, int mBits, bignum *out){
+
+	bignum t;
+	bignum_init(&t);
+
+	int i;
+	for(i = mBits; i > 0 ; i--){					//efficient loop exit
+
+		int t0Bit = bignum_getbit(&t,0);
+		int xiBit = bignum_getbit(x, mBits - i);	//loop exit requires subtraction here
+		int y0Bit = bignum_getbit(y,0);
+		int op = t0Bit + (xiBit * y0Bit);
+
+		if(xiBit == 1){
+			bignum_add(&t, y, &t);
+		}
+
+		if(op == 1){
+			bignum_add(&t, m, &t);
+		}
+
+		bignum_rshift(&t,&t, 1);
+	}
+
+	if(bignum_cmp(&t, m) >= 0){
+		bignum_sub(&t,m,&t);
+	}
+
+	bignum_assign(out,&t);
+}
+
 /*
 Helper method to compute: result = base**exp % modulus
 "Square and multiply algorithm"
@@ -45,13 +76,6 @@ void modular_exponentiation(bignum base, bignum exp, bignum modulus, bignum *res
 
     while (!bignum_is_zero(&exp))
     {
-        // printf("\nbase:   ");
-        // print_bignum(&base);
-        // printf("exp:    ");
-        // print_bignum(&exp);
-        // printf("result: ");
-        // print_bignum(result);
-
         if (exp.arr[0] & 1)
         {
             // result = (result * base) % modulus; // multiply step
@@ -114,11 +138,13 @@ int main()
     printf("Type sizes on this machine (bits): char:%u, short:%u, int:%u, long:%u, long long:%u, size_t:%u\n", sizeof(unsigned char) * 8, sizeof(unsigned short) * 8, sizeof(unsigned int) * 8, sizeof(unsigned long) * 8, sizeof(unsigned long long) * 8, sizeof(size_t) * 8);
 
     // For this project, keys can be generated offline
-    bignum n, e, d, t, c, t_decrypted;
+    bignum n, e, d, t, c, t_decrypted, two, r_exp, r2m;
+    int nBits;
     clock_t before;
     clock_t after;
     clock_t encrypt_cycles;
     clock_t decrypt_cycles;
+    bignum_from_int(&two, 2);
 
      // 24 bit keys
     printf("\nTESTING 24 bit keys\n");
@@ -131,6 +157,10 @@ int main()
     bignum_from_string(&e, e_str_24);
     bignum_from_string(&d, d_str_24);
     bignum_from_string(&t, t_str_24);
+    nBits = bignum_numbits(&n);
+    // bignum_from_int(&r_exp, 2 * nBits);
+    // modular_exponentiation(two, r_exp, n, &r2m);
+    bignum_from_string(&r2m, "00000000000000000032f55d"); // pre-computed from code above
 
     printf("RSA Configuration: \n");
     printf("n: ");
@@ -141,6 +171,9 @@ int main()
     print_bignum(&d);
     printf("t: ");
     print_bignum(&t);
+    printf("r2m");
+    print_bignum(&r2m);
+    printf("Number of bits in n: %d\n", nBits);
 
     printf("ENCRYPT...\n");
 	before = clock();
@@ -169,6 +202,10 @@ int main()
     bignum_from_string(&e, e_str_48);
     bignum_from_string(&d, d_str_48);
     bignum_from_string(&t, t_str_48);
+    nBits = bignum_numbits(&n);
+    // bignum_from_int(&r_exp, 2 * nBits);
+    // modular_exponentiation(two, r_exp, n, &r2m);
+    bignum_from_string(&r2m, "000000000000507fb204bae6"); // pre-computed from code above
 
     printf("RSA Configuration: \n");
     printf("n: ");
@@ -179,6 +216,9 @@ int main()
     print_bignum(&d);
     printf("t: ");
     print_bignum(&t);
+    printf("r2m");
+    print_bignum(&r2m);
+    printf("Number of bits in n: %d\n", nBits);
 
     printf("ENCRYPT...\n");
 	before = clock();
@@ -207,6 +247,10 @@ int main()
     bignum_from_string(&e, e_str_96);
     bignum_from_string(&d, d_str_96);
     bignum_from_string(&t, t_str_96);
+    nBits = bignum_numbits(&n);
+    // bignum_from_int(&r_exp, 2 * nBits);
+    // modular_exponentiation(two, r_exp, n, &r2m);
+    bignum_from_string(&r2m, "2db52cacc055e1ec000dc3c9"); // Must be pre-computed with double width bignums
 
     printf("RSA Configuration: \n");
     printf("n: ");
@@ -217,6 +261,9 @@ int main()
     print_bignum(&d);
     printf("t: ");
     print_bignum(&t);
+    printf("r2m");
+    print_bignum(&r2m);
+    printf("Number of bits in n: %d\n", nBits);
 
     printf("ENCRYPT...\n");
 	before = clock();

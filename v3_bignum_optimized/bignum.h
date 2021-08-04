@@ -66,3 +66,5 @@ enum
 };
 int bignum_cmp(bignum *a, bignum *b); /* Compare: returns LARGER, EQUAL or SMALLER */
 int bignum_is_zero(bignum *n);		  /* For comparison with zero */
+int bignum_getbit(bignum *a, int n);
+int bignum_numbits(bignum *bn);
