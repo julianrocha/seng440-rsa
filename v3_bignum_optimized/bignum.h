@@ -10,7 +10,7 @@ big_num is 96 bits = 12 bytes = 3 ints
 big_num range: [0, 2^96-1] = [0, 7.9e28]
 big_num max value:  79,228,162,514,264,337,593,543,950,335 (29 digits)
 
-Least signinficant bit in the first index, big endian:
+Least significant bit in the first index, big endian:
 Index 		: | 					2					| 						1					|						0					|
 Binary Value: |	0000 0000 0000 0000 0000 0000 0000 0000	|	0000 0000 0000 0000 0000 0000 0000 0000 | 	0000 0000 0000 0000 0000 0000 0000 0000 |
 */
@@ -19,7 +19,7 @@ Binary Value: |	0000 0000 0000 0000 0000 0000 0000 0000	|	0000 0000 0000 0000 00
 
 #define WORD_BYTES 4 // ARM is a 32-bit machine
 #define BN_BYTES 12 // 96 bit numbers (12 bytes)
-#define BN_ARRAY_LEN (BN_BYTES / WORD_BYTES)
+#define BN_ARRAY_LEN (BN_BYTES / WORD_BYTES + 1) // +1 to handle addition overfow
 
 #define BN_DTYPE uint32_t	  // dtype of each array element, ARM is a 32-bit machine
 #define BN_DTYPE_TMP uint64_t // twice the BN_DTYPE size to handle operations like multiplication
@@ -67,4 +67,4 @@ enum
 int bignum_cmp(bignum *a, bignum *b); /* Compare: returns LARGER, EQUAL or SMALLER */
 int bignum_is_zero(bignum *n);		  /* For comparison with zero */
 int bignum_getbit(bignum *a, int n);
-int bignum_numbits(bignum *bn);
+int bignum_numbits(bignum *n);

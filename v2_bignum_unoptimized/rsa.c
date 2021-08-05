@@ -209,7 +209,7 @@ int main()
     bignum_from_string(&e, e_str_96);
     bignum_from_string(&d, d_str_96);
     bignum_from_string(&t, t_str_96);
-    nBits = 84;
+    nBits = 96;
     bignum_from_int(&r_exp, 2 * nBits);
     modular_exponentiation(two, r_exp, n, &r2m);
 
