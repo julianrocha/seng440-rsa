@@ -324,18 +324,20 @@ static void _rshift_one_bit(bignum *a)
 	a->arr[BN_ARRAY_LEN - 1] >>= 1;
 }
 
-int bignum_getbit(bignum *a, int n){
+int bignum_getbit(bignum *a, int n)
+{
 	int arrayInd = (n >> 5);
 	int shift = (n - (arrayInd << 5));
 	return (a->arr[arrayInd] >> shift) & 1;
 }
 
-int bignum_numbits(bignum *bn){
+int bignum_numbits(bignum *n)
+{
 
 	register int f = (BN_ARRAY_LEN << 5) -1;
 
-	for (;f > 0; --f){
-		int b = bignum_getbit(bn, f);
+	for (; f > 0; --f){
+		int b = bignum_getbit(n, f);
 		if (b == 1){
 			return f+1;
 		}

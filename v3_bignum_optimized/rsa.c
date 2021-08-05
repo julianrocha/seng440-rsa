@@ -30,35 +30,43 @@ Optimization Considerations:
 - chinese remainder theorem for decryption (using p and q instead of n)
 */
 
-void montMult(bignum  *x, bignum *y, bignum *m, int mBits, bignum *out){
-
+/*
+Computes a * b mod N in montgomery space using the constant R as defined here: https://en.wikipedia.org/wiki/Montgomery_modular_multiplication
+*/
+void montgomery_mult(bignum *a, bignum *b, bignum *N, int num_bits, bignum *result) 
+{
 	bignum t;
 	bignum_init(&t);
+	int i = num_bits;
 
-	int i;
-	for(i = mBits; i > 0 ; i--){					//efficient loop exit
+    // Loop condition and counter optimized 
+	for(; i != 0 ; i--) 
+    {
+		int t_bit = bignum_getbit(&t, 0);
+		int a_bit = bignum_getbit(a, num_bits - i);
+		int b_bit = bignum_getbit(b, 0);
+		int computed = t_bit + (a_bit * b_bit);
 
-		int t0Bit = bignum_getbit(&t,0);
-		int xiBit = bignum_getbit(x, mBits - i);	//loop exit requires subtraction here
-		int y0Bit = bignum_getbit(y,0);
-		int op = t0Bit + (xiBit * y0Bit);
-
-		if(xiBit == 1){
-			bignum_add(&t, y, &t);
+		if (a_bit == 1) 
+        {
+			bignum_add(&t, b, &t);
 		}
 
-		if(op == 1){
-			bignum_add(&t, m, &t);
+		if (computed == 1) 
+        {
+			bignum_add(&t, N, &t);
 		}
 
-		bignum_rshift(&t,&t, 1);
+		bignum_rshift(&t, &t, 1);
 	}
 
-	if(bignum_cmp(&t, m) >= 0){
-		bignum_sub(&t,m,&t);
+	if (bignum_cmp(&t, N) >= 0) 
+    {
+		bignum_sub(&t, N, &t);
 	}
 
-	bignum_assign(out,&t);
+    // Set the result using the relevant bignum function
+	bignum_assign(result, &t);
 }
 
 void modular_exponentiation_with_mont(bignum base, bignum exp, bignum modulus, int modulusBits, bignum r2m, bignum *result)
@@ -69,10 +77,10 @@ void modular_exponentiation_with_mont(bignum base, bignum exp, bignum modulus, i
     bignum one;
 
     bignum_from_int(result, 1);
-    montMult(result,&r2m,&modulus,modulusBits,&tmp_result);
+    montgomery_mult(result,&r2m,&modulus,modulusBits,&tmp_result);
     bignum_assign(result, &tmp_result);
 
-    montMult(&base, &r2m,&modulus,modulusBits, &tmp_base);
+    montgomery_mult(&base, &r2m,&modulus,modulusBits, &tmp_base);
     bignum_assign(&base, &tmp_base);
 
     while (!bignum_is_zero(&exp))
@@ -82,7 +90,7 @@ void modular_exponentiation_with_mont(bignum base, bignum exp, bignum modulus, i
             // result = (result * base) % modulus; // multiply step
             // bignum_mul(result, &base, &tmp_result);
             // bignum_mod(&tmp_result, &modulus, result);
-            montMult(result,&base,&modulus,modulusBits,&tmp_result);
+            montgomery_mult(result,&base,&modulus,modulusBits,&tmp_result);
             bignum_assign(result, &tmp_result); 
         }
         bignum_rshift(&exp, &tmp_exp, 1);
@@ -91,13 +99,13 @@ void modular_exponentiation_with_mont(bignum base, bignum exp, bignum modulus, i
         // base = (base * base) % modulus;			// square step
         // bignum_mul(&base, &base, &tmp_base);
         // bignum_mod(&tmp_base, &modulus, &base);
-        montMult(&base, &base,&modulus,modulusBits, &tmp_base);
+        montgomery_mult(&base, &base,&modulus,modulusBits, &tmp_base);
         bignum_assign(&base, &tmp_base);
     }
     // bignum_mod(result, &modulus, &tmp_result);
     // bignum_assign(result, &tmp_result);
     bignum_from_int(&one, 1);
-	montMult(result, &one, &modulus, modulusBits, &tmp_result);
+	montgomery_mult(result, &one, &modulus, modulusBits, &tmp_result);
     bignum_assign(result, &tmp_result); 
 }
 
@@ -178,13 +186,14 @@ int main()
     printf("Type sizes on this machine (bits): char:%u, short:%u, int:%u, long:%u, long long:%u, size_t:%u\n", sizeof(unsigned char) * 8, sizeof(unsigned short) * 8, sizeof(unsigned int) * 8, sizeof(unsigned long) * 8, sizeof(unsigned long long) * 8, sizeof(size_t) * 8);
 
     // For this project, keys can be generated offline
-    bignum n, e, d, t, c, t_decrypted, two, r_exp, r2m;
+    bignum n, e, d, t, c, t_decrypted, r2m;
     int nBits;
     clock_t before;
     clock_t after;
     clock_t encrypt_cycles;
     clock_t decrypt_cycles;
-    bignum_from_int(&two, 2);
+    // bignum r_exp, two;
+    // bignum_from_int(&two, 2);
 
      // 24 bit keys
     printf("\nTESTING 24 bit keys\n");
