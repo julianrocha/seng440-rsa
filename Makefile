@@ -1,9 +1,9 @@
 CC     := gcc
-CFLAGS := -I. -Wundef -Wall -Wextra 
+CFLAGS := -I. -Wundef -Wall -Wextra  -O3 # note the optimization flag is being used
 
-V2_FOLDER=v2_bignum_unoptimized/
-V3_FOLDER=v3_bignum_optimized/
-V4_FOLDER=v4_bignum_optimized/
+V2_FOLDER=v2_bignum/
+V3_FOLDER=v3_bignum_mont/
+V4_FOLDER=v4_bignum_mont_optimized/
 
 RSA_FILE_NAME_V2=$(V2_FOLDER)rsa
 BIGNUM_FILE_NAME_V2=$(V2_FOLDER)bignum

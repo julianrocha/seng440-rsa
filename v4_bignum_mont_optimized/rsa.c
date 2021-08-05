@@ -30,35 +30,83 @@ Optimization Considerations:
 - chinese remainder theorem for decryption (using p and q instead of n)
 */
 
-void montMult(bignum  *x, bignum *y, bignum *m, int mBits, bignum *out){
-
+/*
+Computes a * b mod N in montgomery space using the constant R as defined here: https://en.wikipedia.org/wiki/Montgomery_modular_multiplication
+*/
+void montgomery_mult(bignum *a, bignum *b, bignum *N, int num_bits, bignum *result) 
+{
 	bignum t;
 	bignum_init(&t);
+	int i = num_bits;
 
-	int i;
-	for(i = mBits; i > 0 ; i--){					//efficient loop exit
+    // Loop condition and counter optimized 
+	for(; i != 0 ; i--) 
+    {
+		int t_bit = bignum_getbit(&t, 0);
+		int a_bit = bignum_getbit(a, num_bits - i);
+		int b_bit = bignum_getbit(b, 0);
+		int computed = t_bit + (a_bit * b_bit);
 
-		int t0Bit = bignum_getbit(&t,0);
-		int xiBit = bignum_getbit(x, mBits - i);	//loop exit requires subtraction here
-		int y0Bit = bignum_getbit(y,0);
-		int op = t0Bit + (xiBit * y0Bit);
-
-		if(xiBit == 1){
-			bignum_add(&t, y, &t);
+		if (a_bit == 1) 
+        {
+			bignum_add(&t, b, &t);
 		}
 
-		if(op == 1){
-			bignum_add(&t, m, &t);
+		if (computed == 1) 
+        {
+			bignum_add(&t, N, &t);
 		}
 
-		bignum_rshift(&t,&t, 1);
+		bignum_rshift(&t, &t, 1);
 	}
 
-	if(bignum_cmp(&t, m) >= 0){
-		bignum_sub(&t,m,&t);
+	if (bignum_cmp(&t, N) >= 0) 
+    {
+		bignum_sub(&t, N, &t);
 	}
 
-	bignum_assign(out,&t);
+    // Set the result using the relevant bignum function
+	bignum_assign(result, &t);
+}
+
+void modular_exponentiation_with_mont(bignum base, bignum exp, bignum modulus, int modulusBits, bignum r2m, bignum *result)
+{
+    bignum tmp_result;
+    bignum tmp_base;
+    bignum tmp_exp;
+    bignum one;
+
+    bignum_from_int(result, 1);
+    montgomery_mult(result,&r2m,&modulus,modulusBits,&tmp_result);
+    bignum_assign(result, &tmp_result);
+
+    montgomery_mult(&base, &r2m,&modulus,modulusBits, &tmp_base);
+    bignum_assign(&base, &tmp_base);
+
+    while (!bignum_is_zero(&exp))
+    {
+        if (exp.arr[0] & 1)
+        {
+            // result = (result * base) % modulus; // multiply step
+            // bignum_mul(result, &base, &tmp_result);
+            // bignum_mod(&tmp_result, &modulus, result);
+            montgomery_mult(result,&base,&modulus,modulusBits,&tmp_result);
+            bignum_assign(result, &tmp_result); 
+        }
+        bignum_rshift(&exp, &tmp_exp, 1);
+        bignum_assign(&exp, &tmp_exp);
+
+        // base = (base * base) % modulus;			// square step
+        // bignum_mul(&base, &base, &tmp_base);
+        // bignum_mod(&tmp_base, &modulus, &base);
+        montgomery_mult(&base, &base,&modulus,modulusBits, &tmp_base);
+        bignum_assign(&base, &tmp_base);
+    }
+    // bignum_mod(result, &modulus, &tmp_result);
+    // bignum_assign(result, &tmp_result);
+    bignum_from_int(&one, 1);
+	montgomery_mult(result, &one, &modulus, modulusBits, &tmp_result);
+    bignum_assign(result, &tmp_result); 
 }
 
 /*
@@ -111,17 +159,17 @@ ORIGINAL ALGORITHM WITH PRIMITIVE TYPES:
 /*
 c = t**e mod n
 */
-void encrypt(bignum t, bignum e, bignum n, bignum *c)
+void encrypt(bignum t, bignum e, bignum n,int nBits, bignum r2m, bignum *c)
 {
-    modular_exponentiation(t, e, n, c);
+    modular_exponentiation_with_mont(t, e, n, nBits, r2m, c);
 }
 
 /*
 t = c**d mod n
 */
-void decrypt(bignum c, bignum d, bignum n, bignum *t)
+void decrypt(bignum c, bignum d, bignum n,int nBits, bignum r2m, bignum *t)
 {
-    modular_exponentiation(c, d, n, t);
+    modular_exponentiation_with_mont(c, d, n, nBits, r2m, t);
 }
 
 /*
@@ -138,13 +186,14 @@ int main()
     printf("Type sizes on this machine (bits): char:%u, short:%u, int:%u, long:%u, long long:%u, size_t:%u\n", sizeof(unsigned char) * 8, sizeof(unsigned short) * 8, sizeof(unsigned int) * 8, sizeof(unsigned long) * 8, sizeof(unsigned long long) * 8, sizeof(size_t) * 8);
 
     // For this project, keys can be generated offline
-    bignum n, e, d, t, c, t_decrypted, two, r2m;
+    bignum n, e, d, t, c, t_decrypted, r2m;
     int nBits;
     clock_t before;
     clock_t after;
     clock_t encrypt_cycles;
     clock_t decrypt_cycles;
-    bignum_from_int(&two, 2);
+    // bignum r_exp, two;
+    // bignum_from_int(&two, 2);
 
      // 24 bit keys
     printf("\nTESTING 24 bit keys\n");
@@ -177,14 +226,14 @@ int main()
 
     printf("ENCRYPT...\n");
 	before = clock();
-    encrypt(t, e, n, &c);
+    encrypt(t, e, n, nBits, r2m, &c);
 	after = clock();
     encrypt_cycles = after - before;
     printf("c: ");
     print_bignum(&c);
     printf("DECRYPT...\n");
     before = clock();
-    decrypt(c, d, n, &t_decrypted);
+    decrypt(c, d, n, nBits, r2m, &t_decrypted);
     after = clock();
     decrypt_cycles = after - before;
     printf("t: ");
@@ -222,14 +271,14 @@ int main()
 
     printf("ENCRYPT...\n");
 	before = clock();
-    encrypt(t, e, n, &c);
+    encrypt(t, e, n, nBits, r2m, &c);
 	after = clock();
     encrypt_cycles = after - before;
     printf("c: ");
     print_bignum(&c);
     printf("DECRYPT...\n");
     before = clock();
-    decrypt(c, d, n, &t_decrypted);
+    decrypt(c, d, n, nBits, r2m, &t_decrypted);
     after = clock();
     decrypt_cycles = after - before;
     printf("t: ");
@@ -238,7 +287,7 @@ int main()
 
     // 96 bit keys
     printf("\nTESTING 96 bit keys\n");
-    char n_str_96[] = "000d2123f00d92d08643cd4f";
+    char n_str_96[] = "b00d2123f00d92d08643cd4f";
     char e_str_96[] = "000000000000000000010001";
     char d_str_96[] = "1f175280fc4501ce37cb57d1";
     char t_str_96[] = "400000050000000073000001";
@@ -250,7 +299,7 @@ int main()
     nBits = bignum_numbits(&n);
     // bignum_from_int(&r_exp, 2 * nBits);
     // modular_exponentiation(two, r_exp, n, &r2m);
-    bignum_from_string(&r2m, "2db52cacc055e1ec000dc3c9"); // Must be pre-computed with double width bignums
+    bignum_from_string(&r2m, "68011252a3f2d488c6f6b68e"); // Must be pre-computed with double width bignums
 
     printf("RSA Configuration: \n");
     printf("n: ");
@@ -267,14 +316,14 @@ int main()
 
     printf("ENCRYPT...\n");
 	before = clock();
-    encrypt(t, e, n, &c);
+    encrypt(t, e, n, nBits, r2m, &c);
 	after = clock();
     encrypt_cycles = after - before;
     printf("c: ");
     print_bignum(&c);
     printf("DECRYPT...\n");
     before = clock();
-    decrypt(c, d, n, &t_decrypted);
+    decrypt(c, d, n, nBits, r2m, &t_decrypted);
     after = clock();
     decrypt_cycles = after - before;
     printf("t: ");

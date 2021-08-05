@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include "bignum.h"
 
 // Private Functions
@@ -13,6 +14,7 @@ void bignum_init(bignum *n)
 	n->arr[0] = 0;
 	n->arr[1] = 0;
 	n->arr[2] = 0;
+	n->arr[3] = 0;
 }
 
 void bignum_from_int(bignum *n, BN_DTYPE_TMP i)
@@ -33,14 +35,18 @@ void bignum_from_string(bignum *n, char *str)
 {
 	bignum_init(n);
 	BN_DTYPE tmp;
-	int i_arr = 0;									   // lsb to msb in bignum array
-	int i_str = BN_HEX_STR_LEN - 1 - (2 * WORD_BYTES); // right to left in hex string
+	int i_arr = 0;								// lsb to msb in bignum array
+	int i_str = strlen(str) - (2 * WORD_BYTES); // right to left in hex string
 
 	while (i_str >= 0)
 	{
 		sscanf(&str[i_str], SSCANF_FORMAT_STR, &tmp);
 		n->arr[i_arr] = tmp;
 		i_str -= (2 * WORD_BYTES); // 2 hex digits in one byte
+		i_arr += 1;
+	}
+	while (i_arr < BN_ARRAY_LEN){
+		n->arr[i_arr] = 0;
 		i_arr += 1;
 	}
 }
@@ -79,27 +85,29 @@ void bignum_assign(bignum *dst, bignum *src) /* Copy src into dst -- dst := src 
 	dst->arr[0] = src->arr[0];
 	dst->arr[1] = src->arr[1];
 	dst->arr[2] = src->arr[2];
+	dst->arr[3] = src->arr[3];
 }
 
 void bignum_add(bignum *a, bignum *b, bignum *c) /* c = a + b */
 {
 	BN_DTYPE_TMP tmp;
 	register unsigned int carry = carry ^ carry;
-	register int i;
-	for (i ^= i; i < BN_ARRAY_LEN; i += 3)
-	{
-		tmp = (BN_DTYPE_TMP)a->arr[i] + b->arr[i] + carry;
-		carry = (tmp > MAX_VAL);
-		c->arr[i] = (tmp & MAX_VAL);
 
-		tmp = (BN_DTYPE_TMP)a->arr[i+1] + b->arr[i+1] + carry;
-		carry = (tmp > MAX_VAL);
-		c->arr[i+1] = (tmp & MAX_VAL);
+	tmp = (BN_DTYPE_TMP)a->arr[0] + b->arr[0] + carry;
+	carry = (tmp > MAX_VAL);
+	c->arr[0] = (tmp & MAX_VAL);
 
-		tmp = (BN_DTYPE_TMP)a->arr[i+2] + b->arr[i+2] + carry;
-		carry = (tmp > MAX_VAL);
-		c->arr[i+2] = (tmp & MAX_VAL);
-	}
+	tmp = (BN_DTYPE_TMP)a->arr[1] + b->arr[1] + carry;
+	carry = (tmp > MAX_VAL);
+	c->arr[1] = (tmp & MAX_VAL);
+
+	tmp = (BN_DTYPE_TMP)a->arr[2] + b->arr[2] + carry;
+	carry = (tmp > MAX_VAL);
+	c->arr[2] = (tmp & MAX_VAL);
+
+	tmp = (BN_DTYPE_TMP)a->arr[3] + b->arr[3] + carry;
+	carry = (tmp > MAX_VAL);
+	c->arr[3] = (tmp & MAX_VAL);
 }
 
 void bignum_sub(bignum *a, bignum *b, bignum *c) /* c = a - b */
@@ -288,29 +296,23 @@ static void _lshift_word(bignum *a, int nwords)
 
 static void _rshift_word(bignum *a, int nwords)
 {
-	register int i = BN_ARRAY_LEN-1;
+	register int i;
 	if (nwords >= BN_ARRAY_LEN)
 	{
-		for (; i != 0; i -= 3)
-		{
-			a->arr[i] = 0;
-			a->arr[i-1] = 0;
-			a->arr[i-2] = 0;
-		}
+		a->arr[0] = 0;
+		a->arr[1] = 0;
+		a->arr[2] = 0;
+		a->arr[3] = 0;
 		return;
 	}
 
 	for (i ^= i; i < BN_ARRAY_LEN - nwords; ++i)
 	{
 		a->arr[i] = a->arr[i + nwords];
-		a->arr[i+1] = a->arr[i + 1 + nwords];
-		a->arr[i+2] = a->arr[i + 2 + nwords];
 	}
-	for (; i < BN_ARRAY_LEN; i += 3)
+	for (; i < BN_ARRAY_LEN; i += 1)
 	{
 		a->arr[i] = 0;
-		a->arr[i+1] = 0;
-		a->arr[i+2] = 0;
 	}
 }
 
@@ -332,18 +334,20 @@ static void _rshift_one_bit(bignum *a)
 	a->arr[BN_ARRAY_LEN - 1] >>= 1;
 }
 
-int bignum_getbit(bignum *a, int n){
+int bignum_getbit(bignum *a, int n)
+{
 	int arrayInd = (n >> 5);
 	int shift = (n - (arrayInd << 5));
 	return (a->arr[arrayInd] >> shift) & 1;
 }
 
-int bignum_numbits(bignum *bn){
+int bignum_numbits(bignum *n)
+{
 
 	register int f = (BN_ARRAY_LEN << 5) -1;
 
-	for (;f > 0; --f){
-		int b = bignum_getbit(bn, f);
+	for (; f > 0; --f){
+		int b = bignum_getbit(n, f);
 		if (b == 1){
 			return f+1;
 		}

@@ -2,7 +2,7 @@ V4 implements several optimizations to the following functions:
 
 - bignum_init
 - bignum_assign
-- bignum_rshift
+- _rshift_word
 - bignum_add
 
 The optimizations include the following:
