@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include "bignum.h"
 
 // Private Functions
@@ -34,14 +35,18 @@ void bignum_from_string(bignum *n, char *str)
 {
 	bignum_init(n);
 	BN_DTYPE tmp;
-	int i_arr = 0;									   // lsb to msb in bignum array
-	int i_str = BN_HEX_STR_LEN - 1 - (2 * WORD_BYTES); // right to left in hex string
+	int i_arr = 0;								// lsb to msb in bignum array
+	int i_str = strlen(str) - (2 * WORD_BYTES); // right to left in hex string
 
 	while (i_str >= 0)
 	{
 		sscanf(&str[i_str], SSCANF_FORMAT_STR, &tmp);
 		n->arr[i_arr] = tmp;
 		i_str -= (2 * WORD_BYTES); // 2 hex digits in one byte
+		i_arr += 1;
+	}
+	while (i_arr < BN_ARRAY_LEN){
+		n->arr[i_arr] = 0;
 		i_arr += 1;
 	}
 }
@@ -319,18 +324,20 @@ static void _rshift_one_bit(bignum *a)
 	a->arr[BN_ARRAY_LEN - 1] >>= 1;
 }
 
-int bignum_getbit(bignum *a, int n){
+int bignum_getbit(bignum *a, int n)
+{
 	int arrayInd = (n >> 5);
 	int shift = (n - (arrayInd << 5));
 	return (a->arr[arrayInd] >> shift) & 1;
 }
 
-int bignum_numbits(bignum *bn){
+int bignum_numbits(bignum *n)
+{
 
 	register int f = (BN_ARRAY_LEN << 5) -1;
 
-	for (;f > 0; --f){
-		int b = bignum_getbit(bn, f);
+	for (; f > 0; --f){
+		int b = bignum_getbit(n, f);
 		if (b == 1){
 			return f+1;
 		}
